@@ -2,7 +2,7 @@ import itertools
 import glob, os
 import pickle
 
-directory = 'C:/Users/wenyi/Dropbox/Year 4/CSC384/CSC384Project/'
+directory = 'C:/Users/wenyi/PycharmProjects/CSP/Project/testcases/'
 
 # The examples are in a text file with 81 characters per line
 # blank spaces are represented by periods
@@ -52,6 +52,8 @@ def parse_example_file(file):
     # write the dict to pickle file
     pickle.dump(example_dict, output)
     output.close()
+
+    return example_dict
 
 
 def parse_example_files(dir):

@@ -151,15 +151,15 @@ def gen_constraint_tuples(vars, n):
 
     all_tuples = []
     # safe to use permanent domain values for initial constraints
-    for i0 in range(vars[0].domain()):
-        for i1 in range(vars[1].domain()):
-            for i2 in range(vars[2].domain()):
-                for i3 in range(vars[3].domain()):
-                    for i4 in range(vars[4].domain()):
-                        for i5 in range(vars[5].domain()):
-                            for i6 in range(vars[6].domain()):
-                                for i7 in range(vars[7].domain()):
-                                    for i8 in range(vars[8].domain()):
+    for i0 in vars[0].domain():
+        for i1 in vars[1].domain():
+            for i2 in vars[2].domain():
+                for i3 in vars[3].domain():
+                    for i4 in vars[4].domain():
+                        for i5 in vars[5].domain():
+                            for i6 in vars[6].domain():
+                                for i7 in vars[7].domain():
+                                    for i8 in vars[8].domain():
                                         tup = [i0, i1, i2, i3, i4, i5, i6, i7, i8]
                                         # don't consider any tuples with duplicates
                                         # a set has only unique elements
@@ -250,7 +250,9 @@ def sudoku_csp_model_gac(initial_sudoku_board):
         constraint.add_satisfying_tuples(sat_tuples)
         sudoku_csp.add_constraint(constraint)
 
-    gac_enforce(sudoku_csp)
+    dwo = gac_enforce(sudoku_csp)
+    if dwo:
+        print("DWO occurred!")
 
     return sudoku_csp, variable_array
 
@@ -260,25 +262,28 @@ def gac_enforce(sudoku_csp):
     The pruned values will be removed from the variable object's cur_domain.
     If a DWO is detected.
     :param sudoku_csp:
-    :return: None
+    :return: 1 if DWO, else returns 0
     '''
-    constraints = sudoku_csp.get_all_cons()
 
-    change = 1
+    # begin with all constraints on gac queue
+    gac_queue = sudoku_csp.get_all_cons()
 
-    while change:
-        change = 0
-        '''prune that domain and set change to 1'''
-        '''check other constraints to see if their touples are still valid'''
-        for const in constraints:
-
-            '''shouldn't use const.scope?'''
-            for constVar in const.scope:
-                for curDomain in constVar.cur_domain():
-                    if not const.has_support(constVar, curDomain):
-
-                        constVar.prune_value(curDomain)
-                        if constVar.cur_domain_size() == 0:
-                            '''DWO Detected'''
-                            return False
-                        change = 1
+    while len(gac_queue) > 0:
+        const = gac_queue.pop(0)
+        vars = const.get_scope()
+        for var in vars:
+            domain = var.cur_domain()
+            for val in domain:
+                # if there isn't a support for var=val, prune val from var's domain
+                if not const.has_support(var, val):
+                    var.prune_value(val)
+                    if len(var.cur_domain()) == 0:  # domain wipe out
+                        gac_queue.clear()
+                        return 1
+                    else:
+                        relatedConstraints = sudoku_csp.get_cons_with_var(var)
+                        relatedConstraints.remove(const)
+                        for relConst in relatedConstraints:
+                            if relConst not in gac_queue:   # add all related constraints to the queue
+                                gac_queue.append(relConst)
+    return 0
