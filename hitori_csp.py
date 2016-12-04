@@ -4,6 +4,7 @@ Construct and return sudoku CSP models.
 
 from cspbase import *
 import itertools
+import pickle
 
 def sudoku_csp_model(initial_sudoku_board):
     '''Return a CSP object representing a sudoku CSP problem along 
@@ -104,38 +105,31 @@ def subgrid(array, index):
     |6|7|8|
     Where each subgrid is a 3x3 grid.
 
-    0  1  2   3  4  5   6  7  8
-    9  10 11  12 13 14  15 16 17
-    18 19 20  21 22 23  24 25 26
+    0    0  1  2   3  4  5   6  7  8
+    1    9  10 11  12 13 14  15 16 17
+    2    18 19 20  21 22 23  24 25 26
 
-    27 28 29  30 31 32  33 34 35
-    36 37 38  39 40 41  42 43 44
-    45 46 47  48 49 50  51 52 53
+    3    27 28 29  30 31 32  33 34 35
+    4    36 37 38  39 40 41  42 43 44
+    5    45 46 47  48 49 50  51 52 53
 
-    54 55 56  57 58 59  60 61 62
-    63 64 65  66 67 68  69 70 71
-    72 73 74  75 76 77  78 79 80
+    6    54 55 56  57 58 59  60 61 62
+    7    63 64 65  66 67 68  69 70 71
+    8    72 73 74  75 76 77  78 79 80
 
     :param array: nested list
     :param index: int
     :return: list
     '''
     size = 3
-    x = index / size   # the 'row' the subgrid is in
-    y = index % size   # the 'col' the subgrid is in
+    row = (index // size)*3  # the row of the top leftmost element
+    col = (index % size)*3   # the col of the top leftmost element
 
     var_list = []
-    # figure out the index of the top leftmost element
-    topleft = x*27 + y*3
-    midleft = topleft + 9
-    botleft = midleft + 9
 
-    for i in range(topleft, topleft+3):
-        var_list.append(array[i])
-    for i in range(midleft, midleft+3):
-        var_list.append(array[i])
-    for i in range(botleft, botleft+3):
-        var_list.append(array[i])
+    for i in range(row, row+3):
+        for j in range(col, col+3):
+            var_list.append(array[i][j])
 
     return var_list
 
@@ -150,21 +144,39 @@ def gen_constraint_tuples(vars, n):
     '''
 
     all_tuples = []
+
+    # improve runtime by saving tuples for completely blank variable sets
+    assigned = False
+    for var in vars:
+        if var.cur_domain_size() == 1:
+            assigned = True
+            break
+    if not assigned:
+        f = open('C:/Users/wenyi/PycharmProjects/CSP/Project/alltuples.pkl', 'rb')
+        tuples = pickle.load(f)
+        f.close()
+        return tuples
+
     # safe to use permanent domain values for initial constraints
+    # runtime is really slow if we don't check for equality at each for loop
     for i0 in vars[0].domain():
         for i1 in vars[1].domain():
+            if i1 == i0: continue
             for i2 in vars[2].domain():
+                if i2 in {i0, i1}: continue
                 for i3 in vars[3].domain():
+                    if i3 in {i0, i1, i2}: continue
                     for i4 in vars[4].domain():
+                        if i4 in {i0, i1, i2, i3}: continue
                         for i5 in vars[5].domain():
+                            if i5 in {i0, i1, i2, i3, i4}: continue
                             for i6 in vars[6].domain():
+                                if i6 in {i0, i1, i2, i3, i4, i5}: continue
                                 for i7 in vars[7].domain():
+                                    if i7 in {i0, i1, i2, i3, i4, i5, i6}: continue
                                     for i8 in vars[8].domain():
-                                        tup = [i0, i1, i2, i3, i4, i5, i6, i7, i8]
-                                        # don't consider any tuples with duplicates
-                                        # a set has only unique elements
-                                        if len(tup) == len(set(tup)):
-                                            all_tuples.append(tuple(tup))
+                                        if i8 in {i0, i1, i2, i3, i4, i5, i6, i7}: continue
+                                        all_tuples.append(tuple((i0, i1, i2, i3, i4, i5, i6, i7, i8)))
     return all_tuples
 
 ########################################################################################################################

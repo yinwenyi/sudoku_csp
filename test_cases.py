@@ -3,62 +3,21 @@ from cspbase import *
 from propagators import *
 import itertools
 import traceback
+import pickle
 
 ##############
 ##MODEL TEST CASES
 
-directory = 'C:/Users/wenyi/PycharmProjects/CSP/Project/testcases/'
-
-def parse_example_file(file):
-    '''
-    A function for parsing one example file. Returns a list of lists in the following format:
-    [[],[],[],[],...]
-    where there are 9 nested lists inside the main list, each representing a row
-    and each entry in the row list corresponding to a column.
-    Blanks are represented by zeros.
-    This function writes to a pickle file named <example>_parsed
-    :param file: name of file, a string
-    :return: None
-
-    '''
-    example_dict = {}
-    key = 0
-
-    with open(file) as f:
-        lines = f.readlines()
-    for line in lines:
-        # invalid line, skip over this one
-        if len(line) < 3:
-            continue
-        # grab string 9 chars at a time
-        index = 1
-        array_list = []
-        while index < 10:
-            num_list = []
-            slice = line[(index-1)*9:index*9]  # second index is non-inclusive
-            for character in slice:
-                if character != ".":
-                    num = int(character)
-                else:
-                    num = 0      # blanks are represented by zeros
-                num_list.append(num)
-            array_list.append(num_list)
-            index = index + 1
-        # add this example to the dict
-        example_dict[key] = array_list
-        key = key + 1
-
-    return example_dict
-
 # Get the easy test cases
-easyBoards = parse_example_file('C:/Users/wenyi/PycharmProjects/CSP/Project/testcases/easy1011.txt')
+f = open('C:/Users/wenyi/PycharmProjects/CSP/Project/testcases/easy1011_parsed.pkl', 'rb')
+easyBoards = pickle.load(f)
 
 ##Checking that variables are initialized with correct domains in model 1.
 ##Passing this test is a prereq for passing check_model_1_constraints.
 def model_1_import(stu_models):
     score = 0
     try:
-        board = easyBoards[0]
+        board = easyBoards.pop(0)
         csp, var_array = stu_models.sudoku_csp_model(board)
         answer = []
         for i in range(9):
@@ -87,24 +46,20 @@ def model_1_import(stu_models):
 ##Checking that variables are initialized with correct domains in model 2.
 ##Passing this test is a prereq for passing check_model_2_constraints.
 def model_2_import(stu_models):
-    score = 0
+    score = 1
+    details = ""
     try:
-        board = [[1, 3, 4, 1], [3, 1, 2, 4],[2, 4, 2, 3], [1, 2, 3, 2]]
-        answer = [[0, 1], [0, 3], [0, 4], [0, 1], [0, 3], [0, 1], [0, 2], [0, 4], [0, 2], [0, 4], [0, 2], [0, 3], [0, 1], [0, 2], [0, 3], [0, 2]]
-
-        csp, var_array = stu_models.hitori_csp_model_2(board)
-        lister = []
-
-        for i in range(4):
-            for j in range(4):
-                lister.append(var_array[i][j].cur_domain())
-
-        if lister != answer:
-            #details = "FAILED\nExpected Output: %r\nOutput Received: %r" % (answer,lister)
-            details = "Failed to import a board into model 2: initial domains don't match"
-        else:
-            details = ""
-            score = 1
+        board = easyBoards.pop(0)
+        csp, var_array = stu_models.sudoku_csp_model_gac(board)
+        answer = [[7, 9, 4, 5, 8, 2, 1, 3, 6], [2, 6, 8, 9, 3, 1, 7, 4, 5], [3, 1, 5, 4, 7, 6, 9, 8, 2], [6, 8, 9, 7, 1, 5, 3, 2, 4], [4, 3, 2, 8, 6, 9, 5, 7, 1], [1, 5, 7, 2, 4, 3, 8, 6, 9], [8, 2, 1, 6, 5, 7, 4, 9, 3], [9, 4, 3, 1, 2, 8, 6, 5, 7], [5, 7, 6, 3, 9, 4, 2, 1, 8]]
+        for i in range(9):
+            for j in range(9):
+                if answer[i][j] not in var_array[i][j].cur_domain():
+                    details = "No valid solution found"
+                    score = 0
+                    break
+            if score == 0:
+                break
     except Exception:
         details = "One or more runtime errors occurred while importing board into model 2: %r" % traceback.format_exc()
 
@@ -627,12 +582,12 @@ def main(stu_propagators=None, stu_models=None):
     total_score += score
     print("---finished model_1_import---\n")
 
-    # print("---starting model_2_import---")
-    # score,details = model_2_import(stu_models)
-    # print(details)
-    # print("score: %d" % score)
-    # total_score += score
-    # print("---finished model_2_import---\n")
+    print("---starting model_2_import---")
+    score,details = model_2_import(stu_models)
+    print(details)
+    print("score: %d" % score)
+    total_score += score
+    print("---finished model_2_import---\n")
     #
     # print("---starting check_model_1_constraints_enum_rewscols---")
     # score,details = check_model_1_constraints_enum_rewscols(stu_models)
