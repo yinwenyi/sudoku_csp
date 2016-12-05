@@ -65,11 +65,40 @@ def model_2_import(stu_models):
 
     return score,details
     
+def binary_model_import(stu_models, gac):
+    score = 0
+    try:
+        board = easyBoards[0]
+        csp, var_array = stu_models.sudoku_csp_model_binary(board, gac)
+        answer = []
+        for i in range(9):
+            for j in range(9):
+                if board[i][j] == 0:
+                    answer.append(9)
+                else:
+                    answer.append(1)
+
+        lister = []
+        for i in range(9):
+            for j in range(9):
+                lister.append(len(var_array[i][j].cur_domain()))
+
+        if lister != answer:
+            #details = "FAILED\nExpected Output: %r\nOutput Received: %r" % (answer,lister)
+            details = "Failed to import a board into model 1: initial domains don't match"
+        else:
+            details = ""
+            score = 1
+    except Exception:
+        details = "One or more runtime errors occurred while importing board into model 1: %r" % traceback.format_exc()
+
+    return score,details
+    
 def check_ForwaringChecking(stu_models, stu_orderings):
     score = 0
     try:
         board = easyBoards[0]
-        csp, var_array = stu_models.sudoku_csp_model(board)
+        csp, var_array = stu_models.sudoku_csp_model_binary(board)
         answer = []
         for i in range(9):
             for j in range(9):
@@ -88,7 +117,7 @@ def check_ForwaringChecking(stu_models, stu_orderings):
             details = "Failed to import a board into model 1: initial domains don't match"
             
         solver = BT(csp)
-        solver.trace_on()
+        # solver.trace_on()
         solver.bt_search(FC_BT, stu_orderings.ord_random, stu_orderings.val_arbitrary)
 
         if check_solution(var_array):
@@ -625,6 +654,13 @@ def main(stu_propagators=None, stu_models=None):
     # print("score: %d" % score)
     # total_score += score
     # print("---finished model_2_import---\n")
+    
+    print("---starting binary_model_import without GAC enforce---")
+    score,details = binary_model_import(stu_models, False)
+    print(details)
+    print("score: %d" % score)
+    total_score += score
+    print("---finished binary_model_import without GAC enforce---\n")
     
     print("---starting check_ForwaringChecking---")
     score,details = check_ForwaringChecking(stu_models, stu_orderings)
