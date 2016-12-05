@@ -152,7 +152,7 @@ def gen_constraint_tuples(vars, n):
             assigned = True
             break
     if not assigned:
-        f = open('C:/Users/wenyi/PycharmProjects/CSP/Project/alltuples.pkl', 'rb')
+        f = open('alltuples.pkl', 'rb')
         tuples = pickle.load(f)
         f.close()
         return tuples
