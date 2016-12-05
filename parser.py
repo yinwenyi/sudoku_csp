@@ -2,7 +2,7 @@ import itertools
 import glob, os
 import pickle
 
-directory = 'C:/Users/wenyi/PycharmProjects/CSP/Project/testcases/'
+directory = 'testcases/'
 
 # The examples are in a text file with 81 characters per line
 # blank spaces are represented by periods
