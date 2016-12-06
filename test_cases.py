@@ -18,6 +18,7 @@ def model_1_import(stu_models):
     score = 0
     try:
         board = easyBoards.pop(0)
+        length = len(easyBoards)
         csp, var_array = stu_models.sudoku_csp_model(board)
         answer = []
         for i in range(9):
