@@ -266,6 +266,13 @@ def sudoku_csp_model_gac(initial_sudoku_board):
         if dwo:
                 print("DWO occurred!")
 
+        # prune all the invalid values from the variables' PERMANENT domains
+        for var in sudoku_csp.vars:
+            new_domain = var.cur_domain()
+            var.dom.clear()
+            var.curdom.clear()
+            var.add_domain_values(new_domain)
+
         return sudoku_csp, variable_array
 
 def gac_enforce(sudoku_csp):
@@ -289,7 +296,7 @@ def gac_enforce(sudoku_csp):
                                 # if there isn't a support for var=val, prune val from var's domain
                                 if not const.has_support(var, val):
                                         var.prune_value(val)
-                                        if len(var.cur_domain()) == 0:    # domain wipe out
+                                        if var.cur_domain_size() == 0:    # domain wipe out, unsolvable
                                                 gac_queue.clear()
                                                 return 1
                                         else:

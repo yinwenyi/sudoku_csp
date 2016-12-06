@@ -59,7 +59,7 @@ def FCCheck(constraint, var, assignments):
 	inputs:
 		constraint: Constraints object from cspbase
 		var: Unassigned Variable object in constraint from cspbase
-		assignments: List of assignments for each varible in constraint
+		assignments: List of assignments for each variable in constraint
 	returns:
 		status: False if DWO
 		prunings: list of pairs: (var, val) that have been pruned for this constraint'''
