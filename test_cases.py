@@ -66,7 +66,7 @@ def model_2_import(stu_models):
 
     return score,details
     
-def binary_model_import(stu_models, gac):
+def binary_model_import(stu_models, gac, VarSelect, VarAssign):
     score = 0
     try:
         board = easyBoards[0]
@@ -95,59 +95,89 @@ def binary_model_import(stu_models, gac):
 
     return score,details
 
-def check_GAC2(stu_models, stu_orderings, stu_prop):
+    
+def all_diff_model_run(stu_models, Backtracking, VarSelect, VarAssign):
     score = 0
     try:
-        board = easyBoards[0]
-        start = time.time()
-        csp, var_array = stu_models.sudoku_csp_model_gac(board)
-        end = time.time()
-        runtime = end - start
-        print(runtime)
+        for i in range(10):
+          print("Testing board {}".format(i))
+          board = easyBoards[i]
+          start = time.time()
+          csp, var_array = stu_models.sudoku_csp_model(board)
+          end = time.time()
+          runtime = end - start
+          print("Time to encode CSP = {}".format(runtime))
 
-        solver = BT(csp)
-        # solver.trace_on()
-        start = time.time()
-        #solver.bt_search(stu_prop.FC_BT, stu_orderings.ord_random, stu_orderings.val_arbitrary)
-        solver.bt_search(stu_prop.FC_BT, stu_orderings.ord_custom, stu_orderings.val_lcv)
-        end = time.time()
-        runtime = end - start
-        print(runtime)
+          solver = BT(csp)
+          # solver.trace_on()
+          # start = time.time()
+          solver.bt_search(Backtracking, VarSelect, VarAssign)
+          # end = time.time()
+          # runtime = end - start
+          # print(runtime)
 
-        details = ""
-
-    except Exception:
-        details = "One or more runtime errors occurred while importing board into model 1: %r" % traceback.format_exc()
-
-    return score, details
-
-def check_GAC(stu_models, stu_orderings, stu_prop):
-    score = 0
-    try:
-        board = easyBoards[0]
-        start = time.time()
-        csp, var_array = stu_models.sudoku_csp_model_gac(board)
-        end = time.time()
-        runtime = end - start
-        print(runtime)
-
-        solver = BT(csp)
-        # solver.trace_on()
-        start = time.time()
-        solver.bt_search(stu_prop.FC_BT, stu_orderings.ord_random, stu_orderings.val_arbitrary)
-        #solver.bt_search(stu_prop.FC_BT, stu_orderings.ord_custom, stu_orderings.val_lcv)
-        end = time.time()
-        runtime = end - start
-        print(runtime)
-
-        details = ""
+          details = ""
 
     except Exception:
         details = "One or more runtime errors occurred while importing board into model 1: %r" % traceback.format_exc()
 
     return score, details
     
-def check_ForwaringChecking(stu_models, stu_orderings, stu_prop):
+def all_diff_GAC_model_run(stu_models, Backtracking, VarSelect, VarAssign):
+    score = 0
+    try:
+        for i in range(10):
+          print("Testing board {}".format(i))
+          board = easyBoards[i]
+          start = time.time()
+          csp, var_array = stu_models.sudoku_csp_model_gac(board)
+          end = time.time()
+          runtime = end - start
+          print("Time to encode CSP = {}".format(runtime))
+
+          solver = BT(csp)
+          # solver.trace_on()
+          # start = time.time()
+          solver.bt_search(Backtracking, VarSelect, VarAssign)
+          # end = time.time()
+          # runtime = end - start
+          # print(runtime)
+
+          details = ""
+
+    except Exception:
+        details = "One or more runtime errors occurred while importing board into model 1: %r" % traceback.format_exc()
+
+    return score, details
+    
+def binary_model_run(stu_models, gac, Backtracking, VarSelect, VarAssign):
+    score = 0
+    try:
+        for i in range(10):
+          print("Testing board {}".format(i))
+          board = easyBoards[i]
+          start = time.time()
+          csp, var_array = stu_models.sudoku_csp_model_binary(board, gac)
+          end = time.time()
+          runtime = end - start
+          print("Time to encode CSP = {}".format(runtime))
+
+          solver = BT(csp)
+          # solver.trace_on()
+          # start = time.time()
+          solver.bt_search(Backtracking, VarSelect, VarAssign)
+          # end = time.time()
+          # runtime = end - start
+          # print(runtime)
+
+          details = ""
+
+    except Exception:
+        details = "One or more runtime errors occurred while importing board into model 1: %r" % traceback.format_exc()
+
+    return score, details
+    
+def check_ForwaringChecking(stu_models, VarSelect, VarAssign):
     score = 0
     try:
         board = easyBoards[0]
@@ -157,11 +187,6 @@ def check_ForwaringChecking(stu_models, stu_orderings, stu_prop):
         # solver.trace_on()
         solver.bt_search(stu_prop.FC_BT, stu_orderings.ord_random, stu_orderings.val_arbitrary)
 
-        if check_solution(var_array):
-            score = 5
-            details = ""
-        else:
-            details = "Solution found in full run with LCV heuristic on %s was not a valid solution." % name
         
     except Exception:
         details = "One or more runtime errors occurred while importing board into model 1: %r" % traceback.format_exc()
@@ -217,7 +242,7 @@ def main(stu_propagators=None, stu_models=None):
     TOTAL_POINTS = 37
     total_score = 0
 
-    import orderings as stu_orderings
+    import orderings_bill as stu_orderings
     import hitori_csp as stu_models
     import propagators as stu_prop
 
@@ -237,146 +262,89 @@ def main(stu_propagators=None, stu_models=None):
     # total_score += score
     # print("---finished model_gac_import---\n")
     
-    print("---starting binary_model_import without GAC enforce---")
-    score,details = binary_model_import(stu_models, False)
+    print("---starting binary_model_run without GAC enforce---")
+    print("Running plain backtracking with random var selection and random var assignment")
+    score,details = binary_model_run(stu_models, False, stu_prop.prop_BT, stu_orderings.ord_random, stu_orderings.val_arbitrary)
     print(details)
-    print("score: %d" % score)
-    total_score += score
-    print("---finished binary_model_import without GAC enforce---\n")
-
-    print("---starting check_GAC2 custom---")
-    score,details = check_GAC2(stu_models, stu_orderings, stu_prop)
+    print("Running plain backtracking with MRV and LCV")
+    score,details = binary_model_run(stu_models, False, stu_prop.prop_BT, stu_orderings.ord_mrv, stu_orderings.val_lcv)
     print(details)
-    print("score: %d" % score)
-    total_score += score
-    print("---finished check_GAC2 custom---\n")
-
-    print("---starting check_GAC---")
-    score,details = check_GAC(stu_models, stu_orderings, stu_prop)
+    print("Running plain backtracking with DH and LCV")
+    score,details = binary_model_run(stu_models, False, stu_prop.prop_BT, stu_orderings.ord_dh, stu_orderings.val_lcv)
     print(details)
-    print("score: %d" % score)
-    total_score += score
-    print("---finished check_GAC---\n")
+    print("Running FC backtracking with random var selection and random var assignment")
+    score,details = binary_model_run(stu_models, False, stu_prop.FC_BT, stu_orderings.ord_random, stu_orderings.val_arbitrary)
+    print(details)
+    print("Running FC backtracking with MRV and LCV")
+    score,details = binary_model_run(stu_models, False, stu_prop.FC_BT, stu_orderings.ord_mrv, stu_orderings.val_lcv)
+    print(details)
+    print("Running FC backtracking with DH and LCV")
+    score,details = binary_model_run(stu_models, False, stu_prop.FC_BT, stu_orderings.ord_dh, stu_orderings.val_lcv)
+    print(details)
+    print("---finished binary_model_run without GAC enforce---\n")
+    
+    print("---starting binary_model_run with GAC enforce---")
+    print("Running plain backtracking with random var selection and random var assignment")
+    score,details = binary_model_run(stu_models, True, stu_prop.prop_BT, stu_orderings.ord_random, stu_orderings.val_arbitrary)
+    print(details)
+    print("Running plain backtracking with MRV and LCV")
+    score,details = binary_model_run(stu_models, True, stu_prop.prop_BT, stu_orderings.ord_mrv, stu_orderings.val_lcv)
+    print(details)
+    print("Running plain backtracking with DH and LCV")
+    score,details = binary_model_run(stu_models, True, stu_prop.prop_BT, stu_orderings.ord_dh, stu_orderings.val_lcv)
+    print(details)
+    print("Running FC backtracking with random var selection and random var assignment")
+    score,details = binary_model_run(stu_models, True, stu_prop.FC_BT, stu_orderings.ord_random, stu_orderings.val_arbitrary)
+    print(details)
+    print("Running FC backtracking with MRV and LCV")
+    score,details = binary_model_run(stu_models, True, stu_prop.FC_BT, stu_orderings.ord_mrv, stu_orderings.val_lcv)
+    print(details)
+    print("Running FC backtracking with DH and LCV")
+    score,details = binary_model_run(stu_models, True, stu_prop.FC_BT, stu_orderings.ord_dh, stu_orderings.val_lcv)
+    print(details)
+    print("---finished binary_model_run with GAC enforce---\n")
 
-    # print("---starting check_ForwaringChecking---")
-    # score,details = check_ForwaringChecking(stu_models, stu_orderings, stu_prop)
-    # print(details)
-    # print("score: %d" % score)
-    # total_score += score
-    # print("---finished check_ForwaringChecking---\n")
-    #
-    # print("---starting check_model_1_constraints_enum_rewscols---")
-    # score,details = check_model_1_constraints_enum_rewscols(stu_models)
-    # print(details)
-    # print("score: %d" % score)
-    # total_score += score
-    # print("---finished check_model_1_constraints_enum_rewscols---\n")
-    #
-    # print("---starting check_model_2_constraints_enum_rewscols---")
-    # score,details = check_model_2_constraints_enum_rewscols(stu_models)
-    # print(details)
-    # print("score: %d" % score)
-    # total_score += score
-    # print("---finished check_model_2_constraints_enum_rewscols---\n")
-    #
-    # print("---starting binary model 1---")
-    # score,details = check_binary_constraint_model_1(stu_models)
-    # print(details)
-    # print("score: %d" % score)
-    # total_score += score
-    # print("---finished binary model 1---\n")
-    #
-    # print("---starting nary model 2---")
-    # score,details = check_nary_constraint_model_2(stu_models)
-    # print(details)
-    # print("score: %d" % score)
-    # total_score += score
-    # print("---finished nary model 2---\n")
-    #
-    # print("---starting unsolvable model 1---")
-    # score,details = test_UNSAT_problem_model_1(stu_models, stu_orderings)
-    # print(details)
-    # print("score: %d" % score)
-    # total_score += score
-    # print("---finished unsolvable model 1---\n")
-    #
-    # print("---starting unsolvable model 2---")
-    # score,details = test_UNSAT_problem_model_2(stu_models, stu_orderings)
-    # print(details)
-    # print("score: %d" % score)
-    # total_score += score
-    # print("---finished unsolvable model 2---\n")
-    #
-    # print("---starting sat tuples model 1---")
-    # score, details = test_sat_tuples(stu_models.hitori_csp_model_1, stu_orderings)
-    # print(details)
-    # print("score: %d" % score)
-    # total_score += score
-    # print("---finished sat tuples model 1---\n")
-    #
-    # print("---starting sat tuples model 2---")
-    # score, details = test_sat_tuples(stu_models.hitori_csp_model_2, stu_orderings)
-    # print(details)
-    # print("score: %d" % score)
-    # total_score += score
-    # print("---finished sat tuples model 2---\n")
-    #
-    # print("---starting small problem model 1---")
-    # score, details = test_small_case(stu_models.hitori_csp_model_1, stu_orderings)
-    # print(details)
-    # print("score: %d" % score)
-    # total_score += score
-    # print("---finished small problem model 1---\n")
-    #
-    # print("---starting small problem model 2---")
-    # score, details = test_small_case(stu_models.hitori_csp_model_2, stu_orderings)
-    # print(details)
-    # print("score: %d" % score)
-    # total_score += score
-    # print("---finished small problem model 2---\n")
-    # print("---STARTING ORDERING TESTS---\n")
-    #
-    # print("---starting test_ord_dh---")
-    # score, details = test_ord_dh(stu_models.hitori_csp_model_2, stu_orderings)
-    # print(details)
-    # print("score: %d" % score)
-    # total_score += score
-    # print("---finished test_ord_dh---\n")
-    #
-    # print("---starting test_ord_mrv---")
-    # score, details = test_ord_mrv(stu_models.hitori_csp_model_2, stu_orderings)
-    # print(details)
-    # print("score: %d" % score)
-    # total_score += score
-    # print("---finished test_ord_mrv---\n")
-    #
-    # print("---STARTING FULL RUN TESTS---\n")
-    #
-    # print("---starting test_big_problem---\n")
-    # score, details = test_big_problem(stu_models.hitori_csp_model_1, stu_orderings)
-    # print(details)
-    # print("score: %d" % score)
-    # total_score += score
-    # print("---finished test_big_problem---\n")
-    #
-    # print("---starting full run model 1---")
-    # score, details = test_full_run(stu_models.hitori_csp_model_1, stu_orderings)
-    # print(details)
-    # print("score: %d" % score)
-    # total_score += score
-    # print("---finished full model 1---\n")
-    #
-    # print("---starting full run model 2---")
-    # score, details = test_full_run(stu_models.hitori_csp_model_2, stu_orderings)
-    # print(details)
-    # print("score: %d" % score)
-    # total_score += score
-    # print("---finished full run model 2---\n")
-    #
-    # if total_score == TOTAL_POINTS:
-    #     print("Score: %d/%d; Passed all tests" % (total_score,TOTAL_POINTS))
-    # else:
-    #     print("Score: %d/%d; Did not pass all tests." % (total_score,TOTAL_POINTS))
+    print("---starting all_diff_model_run without GAC enforce---")
+    print("Running plain backtracking with random var selection and random var assignment")
+    score,details = all_diff_model_run(stu_models, stu_prop.prop_BT, stu_orderings.ord_random, stu_orderings.val_arbitrary)
+    print(details)
+    print("Running plain backtracking with MRV and LCV")
+    score,details = all_diff_model_run(stu_models, stu_prop.prop_BT, stu_orderings.ord_mrv, stu_orderings.val_lcv)
+    print(details)
+    print("Running plain backtracking with DH and LCV")
+    score,details = all_diff_model_run(stu_models, stu_prop.prop_BT, stu_orderings.ord_dh, stu_orderings.val_lcv)
+    print(details)
+    print("Running FC backtracking with random var selection and random var assignment")
+    score,details = all_diff_model_run(stu_models, stu_prop.FC_BT, stu_orderings.ord_random, stu_orderings.val_arbitrary)
+    print(details)
+    print("Running FC backtracking with MRV and LCV")
+    score,details = all_diff_model_run(stu_models, stu_prop.FC_BT, stu_orderings.ord_mrv, stu_orderings.val_lcv)
+    print(details)
+    print("Running FC backtracking with DH and LCV")
+    score,details = all_diff_model_run(stu_models, stu_prop.FC_BT, stu_orderings.ord_dh, stu_orderings.val_lcv)
+    print(details)
+    print("---finished all_diff_model_run without GAC enforce---\n")
+
+    print("---starting all_diff_GAC_model_run with GAC enforce---")
+    print("Running plain backtracking with random var selection and random var assignment")
+    score,details = all_diff_GAC_model_run(stu_models, stu_prop.prop_BT, stu_orderings.ord_random, stu_orderings.val_arbitrary)
+    print(details)
+    print("Running plain backtracking with MRV and LCV")
+    score,details = all_diff_GAC_model_run(stu_models, stu_prop.prop_BT, stu_orderings.ord_mrv, stu_orderings.val_lcv)
+    print(details)
+    print("Running plain backtracking with DH and LCV")
+    score,details = all_diff_GAC_model_run(stu_models, stu_prop.prop_BT, stu_orderings.ord_dh, stu_orderings.val_lcv)
+    print(details)
+    print("Running FC backtracking with random var selection and random var assignment")
+    score,details = all_diff_GAC_model_run(stu_models, stu_prop.FC_BT, stu_orderings.ord_random, stu_orderings.val_arbitrary)
+    print(details)
+    print("Running FC backtracking with MRV and LCV")
+    score,details = all_diff_GAC_model_run(stu_models, stu_prop.FC_BT, stu_orderings.ord_mrv, stu_orderings.val_lcv)
+    print(details)
+    print("Running FC backtracking with DH and LCV")
+    score,details = all_diff_GAC_model_run(stu_models, stu_prop.FC_BT, stu_orderings.ord_dh, stu_orderings.val_lcv)
+    print(details)
+    print("---finished all_diff_GAC_model_run with GAC enforce---\n")
 
 if __name__=="__main__":
     main()

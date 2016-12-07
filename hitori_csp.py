@@ -26,20 +26,8 @@ def sudoku_csp_model(initial_sudoku_board):
              you built to represent the value to be placed in cell i,j of
              the sudoku board (indexed from (0,0) to (8,8))
              
-             The input board is specified as a list of n lists. Each of the
-             n lists represents a row of the board. Each item in the list 
-             represents a cell, and will contain a number between 1-9 or 0,
-             where 0 represents a blank square.
-     
-             The variables of model_2 are: a variable for each cell of the board,
-             with domain equal to {1,2,3,4,5,6,7,8,9} for unassigned vars.
-             Assigned vars have a domain of {i}, where i is the initial value.
-             Variables will be named '0-0' through '8-8'.
-
-             model has 27 all-different constraints, 9 for the rows, 9 for the
-             columns, and 9 for the subgrids. Each constraint is over 9 variables.
-             
         '''
+        print("Creating all diff model without GAC")
         sudoku_csp = CSP("sudoku_csp_model")
 
         # initialize nested list for array of variables
@@ -200,23 +188,8 @@ def sudoku_csp_model_gac(initial_sudoku_board):
              such that variable_array[i][j] is the Variable (object) that
              you built to represent the value to be placed in cell i,j of
              the sudoku board (indexed from (0,0) to (8,8))
-
-             The input board is specified as a list of n lists. Each of the
-             n lists represents a row of the board. Each item in the list
-             represents a cell, and will contain a number between 1-9 or 0,
-             where 0 represents a blank square.
-
-             The variables of model_gac are: a variable for each cell of the board,
-             with domain equal to {1,2,3,4,5,6,7,8,9} for unassigned vars.
-             Assigned vars have a domain of {i}, where i is the initial value.
-             Variables will be named '0-0' through '8-8'.
-
-             model_gac has 27 all-different constraints, 9 for the rows, 9 for the
-             columns, and 9 for the subgrids. Each constraint is over 9 variables.
-
-             This model enforces GAC on the constraints.
-
         '''
+        print("Creating all diff model with GAC")
         sudoku_csp = CSP("sudoku_csp_model_gac")
 
         # initialize nested list for array of variables
@@ -314,6 +287,8 @@ def sudoku_csp_model_binary(initial_sudoku_board, gac=False):
     Each cell is its own variable
     Constraints will be all binary diff constraints
     '''
+        
+    print("Creating binary model with GAC set to {}".format(gac))
 
     sudoku_csp = CSP("sudoku_csp_model")
     # initialize nested list for array of variables
