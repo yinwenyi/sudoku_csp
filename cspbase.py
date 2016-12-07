@@ -461,7 +461,7 @@ class BT:
            '''
 
         self.clear_stats()
-        stime = time.process_time()
+        self.stime = time.process_time()
 
         self.restore_all_variable_domains()
         
@@ -485,11 +485,15 @@ class BT:
 
 
         self.restoreValues(prunings)
+        ttime = time.process_time() - self.stime
         if status == False:
-            print("CSP{} unsolved. Has no solutions".format(self.csp.name))
+            if ttime > 120:
+                print("CSP{} unsolved. Longer than 5 mins".format(self.csp.name))
+            else:
+                print("CSP{} unsolved. Has no solutions".format(self.csp.name))
         if status == True:
             print("CSP {} solved. CPU Time used = {}".format(self.csp.name,
-                                                             time.process_time() - stime))
+                                                             ttime))
             self.csp.print_soln()
 
         print("bt_search finished")
@@ -517,7 +521,8 @@ class BT:
             value_order = val_ord(self.csp,var)
 
             for val in value_order:
-
+                if (time.process_time() - self.stime) > 120:
+                    return False
                 if self.TRACE:
                     print('  ' * level, "bt_recurse trying", var, "=", val)
 
